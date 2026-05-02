@@ -2,7 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Image, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Platform, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomNav from "../../components/BottomNav";
 import { auth, db } from "../../FirebaseConfig";
@@ -18,7 +18,7 @@ export default function GuardianProfile() {
   const [gender, setGender] = useState<string | null>(null);
   const [children, setChildren] = useState<any[]>([]);
 
-  const fetchProfileData = async () => {
+  const fetchProfileData = React.useCallback(async () => {
     if (user?.uid) {
       const docSnap = await getDoc(doc(db, "users", user.uid));
       if (docSnap.exists()) {
@@ -36,7 +36,7 @@ export default function GuardianProfile() {
         setGender("Male");
       }
     }
-  };
+  }, [user]);
 
   const handleRemoveStudent = async (requestId: string, studentName: string) => {
     Alert.alert(
@@ -64,7 +64,7 @@ export default function GuardianProfile() {
 
   useEffect(() => {
     fetchProfileData();
-  }, [user]);
+  }, [user, fetchProfileData]);
 
   const handleSave = async () => {
     if (user?.uid) {
@@ -98,7 +98,7 @@ export default function GuardianProfile() {
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     fetchProfileData().then(() => setRefreshing(false));
-  }, []);
+  }, [fetchProfileData]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -264,6 +264,6 @@ const styles = StyleSheet.create({
 // Helper to get the correct backend URL for device/emulator
 const getBackendUrl = (path: string) => {
   // Use 10.0.2.2 for Android emulator, otherwise use your PC's IP
-  const baseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://192.168.0.114:5000';
+  const baseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://192.168.0.196:5000';
   return `${baseUrl}${path}`;
 };
